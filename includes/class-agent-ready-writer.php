@@ -4,7 +4,7 @@
  *
  * A sheet is an array with the keys name, header and records.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Writes MTSV. Spec: Convert, Writer.
  */
-class Agent_Sitemap_Writer {
+class Agent_Ready_Writer {
 
 	/**
 	 * The most URLs one book holds. Writer 4.

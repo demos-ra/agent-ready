@@ -2,7 +2,7 @@
 /**
  * Route: stores the main book and answers the URLs of every book.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,27 +10,27 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Routes requests. Spec: Publish, Route.
  */
-class Agent_Sitemap_Route {
+class Agent_Ready_Route {
 
 	/**
 	 * The query variable naming what is asked for.
 	 */
-	const QUERY = 'agent_sitemap';
+	const QUERY = 'agent_ready';
 
 	/**
 	 * The query variable giving a book's number or a post's ID.
 	 */
-	const NUMBER = 'agent_sitemap_number';
+	const NUMBER = 'agent_ready_number';
 
 	/**
 	 * The option listing the stored books: loc, lastmod.
 	 */
-	const BOOKS = 'agent_sitemap_books';
+	const BOOKS = 'agent_ready_books';
 
 	/**
 	 * The event that rebuilds the main book.
 	 */
-	const REBUILD = 'agent_sitemap_rebuild';
+	const REBUILD = 'agent_ready_rebuild';
 
 	/**
 	 * Hooks into WordPress.
@@ -50,7 +50,7 @@ class Agent_Sitemap_Route {
 	 * Adds the routes. Route 1.
 	 */
 	public static function register() {
-		$slug = preg_quote( AGENT_SITEMAP_SLUG, '/' );
+		$slug = preg_quote( AGENT_READY_SITEMAP_SLUG, '/' );
 
 		add_rewrite_rule( '^' . $slug . '\.mtsv$', 'index.php?' . self::QUERY . '=book&' . self::NUMBER . '=1', 'top' );
 		add_rewrite_rule( '^' . $slug . '-(\d+)\.mtsv$', 'index.php?' . self::QUERY . '=book&' . self::NUMBER . '=$matches[1]', 'top' );
@@ -119,7 +119,7 @@ class Agent_Sitemap_Route {
 	 */
 	public static function book_url( $number = 1 ) {
 		$suffix = 1 === $number ? '' : '-' . $number;
-		return self::url( '/' . AGENT_SITEMAP_SLUG . $suffix . '.mtsv', 'book', $number );
+		return self::url( '/' . AGENT_READY_SITEMAP_SLUG . $suffix . '.mtsv', 'book', $number );
 	}
 
 	/**
@@ -129,7 +129,7 @@ class Agent_Sitemap_Route {
 	 * @return string The URL.
 	 */
 	public static function post_url( $post_id ) {
-		return self::url( '/' . AGENT_SITEMAP_SLUG . '-post-' . $post_id . '.mtsv', 'post', $post_id );
+		return self::url( '/' . AGENT_READY_SITEMAP_SLUG . '-post-' . $post_id . '.mtsv', 'post', $post_id );
 	}
 
 	/**
@@ -169,7 +169,7 @@ class Agent_Sitemap_Route {
 	 */
 	private static function folder() {
 		$uploads = wp_upload_dir();
-		return trailingslashit( $uploads['basedir'] ) . AGENT_SITEMAP_SLUG . '/';
+		return trailingslashit( $uploads['basedir'] ) . AGENT_READY_SITEMAP_SLUG . '/';
 	}
 
 	/**
@@ -184,16 +184,16 @@ class Agent_Sitemap_Route {
 		$folder = self::folder();
 		wp_mkdir_p( $folder );
 
-		$books   = Agent_Sitemap_Writer::split( Agent_Sitemap_Relations::main( array( __CLASS__, 'post_url' ) ) );
+		$books   = Agent_Ready_Writer::split( Agent_Ready_Relations::main( array( __CLASS__, 'post_url' ) ) );
 		$sitemap = array();
 		foreach ( $books as $index => $book ) {
 			$modified  = self::newest( $book['posts']['records'] );
-			$sitemap[] = Agent_Sitemap_Fields::sitemap_row( self::book_url( $index + 1 ), Agent_Sitemap_Fields::lastmod( gmdate( 'Y-m-d H:i:s', $modified ) ) );
+			$sitemap[] = Agent_Ready_Fields::sitemap_row( self::book_url( $index + 1 ), Agent_Ready_Fields::lastmod( gmdate( 'Y-m-d H:i:s', $modified ) ) );
 		}
 
 		foreach ( $books as $index => $book ) {
 			$book['sitemap']['records'] = $sitemap;
-			$filesystem->put_contents( $folder . ( $index + 1 ) . '.mtsv', Agent_Sitemap_Writer::write( $book ) );
+			$filesystem->put_contents( $folder . ( $index + 1 ) . '.mtsv', Agent_Ready_Writer::write( $book ) );
 		}
 
 		$number = count( $books ) + 1;
@@ -215,7 +215,7 @@ class Agent_Sitemap_Route {
 		if ( empty( $records ) ) {
 			return time();
 		}
-		$lastmod = array_search( 'lastmod', Agent_Sitemap_Fields::RELATIONS['posts'], true );
+		$lastmod = array_search( 'lastmod', Agent_Ready_Fields::RELATIONS['posts'], true );
 		return max( array_map( 'strtotime', array_column( $records, $lastmod ) ) );
 	}
 
@@ -230,13 +230,13 @@ class Agent_Sitemap_Route {
 
 		$number = absint( get_query_var( self::NUMBER ) );
 		$done   = false;
-		if ( Agent_Sitemap_Visibility::is_site_public() ) {
+		if ( Agent_Ready_Visibility::is_site_public() ) {
 			if ( 'book' === $query ) {
 				$done = self::send_book( $number );
 			} elseif ( 'post' === $query ) {
 				$done = self::send_post( $number );
 			} elseif ( 'llms' === $query ) {
-				Agent_Sitemap_Response::send( Agent_Sitemap_Discovery::llms_text(), Agent_Sitemap_Response::LLMS_TYPE, 0 );
+				Agent_Ready_Response::send( Agent_Ready_Discovery::llms_text(), Agent_Ready_Response::LLMS_TYPE, 0 );
 				$done = true;
 			}
 		}
@@ -244,7 +244,7 @@ class Agent_Sitemap_Route {
 		if ( $done ) {
 			exit;
 		}
-		Agent_Sitemap_Response::not_found();
+		Agent_Ready_Response::not_found();
 	}
 
 	/**
@@ -261,7 +261,7 @@ class Agent_Sitemap_Route {
 			return false;
 		}
 
-		Agent_Sitemap_Response::send( $filesystem->get_contents( $path ), Agent_Sitemap_Response::MTSV_TYPE, strtotime( $books[ $number - 1 ][1] ) );
+		Agent_Ready_Response::send( $filesystem->get_contents( $path ), Agent_Ready_Response::MTSV_TYPE, strtotime( $books[ $number - 1 ][1] ) );
 		return true;
 	}
 
@@ -273,13 +273,13 @@ class Agent_Sitemap_Route {
 	 */
 	private static function send_post( $post_id ) {
 		$post = get_post( $post_id );
-		if ( ! $post || ! Agent_Sitemap_Visibility::is_post_public( $post ) ) {
+		if ( ! $post || ! Agent_Ready_Visibility::is_post_public( $post ) ) {
 			return false;
 		}
 
 		$sitemap = get_option( self::BOOKS, array() );
-		$text    = Agent_Sitemap_Writer::write( Agent_Sitemap_Relations::page( $post, $sitemap ) );
-		Agent_Sitemap_Response::send( $text, Agent_Sitemap_Response::MTSV_TYPE, strtotime( $post->post_modified_gmt ) );
+		$text    = Agent_Ready_Writer::write( Agent_Ready_Relations::page( $post, $sitemap ) );
+		Agent_Ready_Response::send( $text, Agent_Ready_Response::MTSV_TYPE, strtotime( $post->post_modified_gmt ) );
 		return true;
 	}
 }

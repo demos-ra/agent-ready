@@ -2,7 +2,7 @@
 /**
  * Fields: each sheet's columns, as the spec's fields sheet lists them.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 // phpcs:disable WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- PHP's own DOM property names.
@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Fills columns. Spec: Convert, Fields.
  */
-class Agent_Sitemap_Fields {
+class Agent_Ready_Fields {
 
 	/**
 	 * Every relation's columns, key first. Fields 1, 2.

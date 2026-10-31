@@ -2,7 +2,7 @@
 /**
  * Visibility: what WordPress's core sitemap treats as public.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
  * query returns it, and comments, meta, options, emails and logins are no
  * column of the fields sheet.
  */
-class Agent_Sitemap_Visibility {
+class Agent_Ready_Visibility {
 
 	/**
 	 * Whether the site is public. Visibility 2.
@@ -42,6 +42,6 @@ class Agent_Sitemap_Visibility {
 	 */
 	public static function is_post_public( $post ) {
 		return in_array( $post->post_status, self::post_statuses(), true )
-			&& in_array( $post->post_type, Agent_Sitemap_Providers::post_types(), true );
+			&& in_array( $post->post_type, Agent_Ready_Providers::post_types(), true );
 	}
 }

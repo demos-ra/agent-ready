@@ -2,7 +2,7 @@
 /**
  * Relations: what was gathered, as the books' sheets.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,21 +10,21 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Builds sheets. Spec: Convert, Relations.
  */
-class Agent_Sitemap_Relations {
+class Agent_Ready_Relations {
 
 	/**
 	 * The main book's sheets, in order, keyed by name. Relations 1.
 	 *
-	 * Relations 4 is the order of Agent_Sitemap_Fields::RELATIONS, and of the
+	 * Relations 4 is the order of Agent_Ready_Fields::RELATIONS, and of the
 	 * sheets here: new ones go at the end.
 	 *
 	 * @param callable $alternate Gives the URL of a post's page book.
 	 * @return array The sheets.
 	 */
 	public static function main( $alternate ) {
-		$posts = Agent_Sitemap_Providers::posts();
-		$terms = Agent_Sitemap_Providers::terms();
-		$users = Agent_Sitemap_Providers::users();
+		$posts = Agent_Ready_Providers::posts();
+		$terms = Agent_Ready_Providers::terms();
+		$users = Agent_Ready_Providers::users();
 
 		$user_ids = array();
 		foreach ( $users as $user ) {
@@ -41,19 +41,19 @@ class Agent_Sitemap_Relations {
 			$taxonomy_ids[ $term->term_taxonomy_id ] = true;
 		}
 
-		$author = array_search( 'post_author', Agent_Sitemap_Fields::RELATIONS['posts'], true );
-		$parent = array_search( 'post_parent', Agent_Sitemap_Fields::RELATIONS['posts'], true );
+		$author = array_search( 'post_author', Agent_Ready_Fields::RELATIONS['posts'], true );
+		$parent = array_search( 'post_parent', Agent_Ready_Fields::RELATIONS['posts'], true );
 
 		$post_rows = array();
 		foreach ( $posts as $post ) {
-			$row = Agent_Sitemap_Fields::post_row( $post, call_user_func( $alternate, $post->ID ) );
+			$row = Agent_Ready_Fields::post_row( $post, call_user_func( $alternate, $post->ID ) );
 
 			$row[ $author ] = isset( $user_ids[ $row[ $author ] ] ) ? $row[ $author ] : '';
 			$row[ $parent ] = isset( $post_ids[ $row[ $parent ] ] ) ? $row[ $parent ] : '';
 			$post_rows[]    = $row;
 		}
 
-		$term_parent = array_search( 'parent', Agent_Sitemap_Fields::RELATIONS['taxonomies'], true );
+		$term_parent = array_search( 'parent', Agent_Ready_Fields::RELATIONS['taxonomies'], true );
 
 		$term_rows = array();
 		foreach ( $terms as $term ) {
@@ -61,20 +61,20 @@ class Agent_Sitemap_Relations {
 			if ( is_wp_error( $loc ) ) {
 				continue;
 			}
-			$row = Agent_Sitemap_Fields::term_row( $term, $loc );
+			$row = Agent_Ready_Fields::term_row( $term, $loc );
 
 			$row[ $term_parent ] = isset( $term_ids[ $row[ $term_parent ] ] ) ? $row[ $term_parent ] : '';
 			$term_rows[]         = $row;
 		}
 
-		$user_rows = array_map( array( 'Agent_Sitemap_Fields', 'user_row' ), $users );
+		$user_rows = array_map( array( 'Agent_Ready_Fields', 'user_row' ), $users );
 
 		return array(
-			'sitemap'            => Agent_Sitemap_Fields::sheet( 'sitemap', array() ),
-			'posts'              => Agent_Sitemap_Fields::sheet( 'posts', $post_rows ),
-			'taxonomies'         => Agent_Sitemap_Fields::sheet( 'taxonomies', $term_rows ),
-			'users'              => Agent_Sitemap_Fields::sheet( 'users', $user_rows ),
-			'term_relationships' => Agent_Sitemap_Fields::sheet( 'term_relationships', self::pairs( $post_ids, $taxonomy_ids ) ),
+			'sitemap'            => Agent_Ready_Fields::sheet( 'sitemap', array() ),
+			'posts'              => Agent_Ready_Fields::sheet( 'posts', $post_rows ),
+			'taxonomies'         => Agent_Ready_Fields::sheet( 'taxonomies', $term_rows ),
+			'users'              => Agent_Ready_Fields::sheet( 'users', $user_rows ),
+			'term_relationships' => Agent_Ready_Fields::sheet( 'term_relationships', self::pairs( $post_ids, $taxonomy_ids ) ),
 		);
 	}
 
@@ -87,8 +87,8 @@ class Agent_Sitemap_Relations {
 	 */
 	public static function page( $post, $sitemap ) {
 		return array(
-			Agent_Sitemap_Fields::sheet( 'sitemap', $sitemap ),
-			Agent_Sitemap_Fields::sheet( 'post_content', Agent_Sitemap_Fields::content_rows( $post ) ),
+			Agent_Ready_Fields::sheet( 'sitemap', $sitemap ),
+			Agent_Ready_Fields::sheet( 'post_content', Agent_Ready_Fields::content_rows( $post ) ),
 		);
 	}
 
@@ -107,7 +107,7 @@ class Agent_Sitemap_Relations {
 		foreach ( array_chunk( $ids, 1000 ) as $chunk ) {
 			$found = wp_get_object_terms(
 				$chunk,
-				Agent_Sitemap_Providers::taxonomies(),
+				Agent_Ready_Providers::taxonomies(),
 				array(
 					'fields'  => 'all_with_object_id',
 					'orderby' => 'none',

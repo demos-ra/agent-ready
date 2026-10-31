@@ -12,25 +12,25 @@
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: agent-ready
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'AGENT_SITEMAP_SLUG', 'agent-sitemap' );
+define( 'AGENT_READY_SITEMAP_SLUG', 'agent-sitemap' );
 
-require_once __DIR__ . '/includes/class-agent-sitemap-writer.php';
-require_once __DIR__ . '/includes/class-agent-sitemap-visibility.php';
-require_once __DIR__ . '/includes/class-agent-sitemap-providers.php';
-require_once __DIR__ . '/includes/class-agent-sitemap-fields.php';
-require_once __DIR__ . '/includes/class-agent-sitemap-relations.php';
-require_once __DIR__ . '/includes/class-agent-sitemap-response.php';
-require_once __DIR__ . '/includes/class-agent-sitemap-route.php';
-require_once __DIR__ . '/includes/class-agent-sitemap-discovery.php';
+require_once __DIR__ . '/includes/class-agent-ready-writer.php';
+require_once __DIR__ . '/includes/class-agent-ready-visibility.php';
+require_once __DIR__ . '/includes/class-agent-ready-providers.php';
+require_once __DIR__ . '/includes/class-agent-ready-fields.php';
+require_once __DIR__ . '/includes/class-agent-ready-relations.php';
+require_once __DIR__ . '/includes/class-agent-ready-response.php';
+require_once __DIR__ . '/includes/class-agent-ready-route.php';
+require_once __DIR__ . '/includes/class-agent-ready-discovery.php';
 
-Agent_Sitemap_Route::init();
-Agent_Sitemap_Discovery::init();
+Agent_Ready_Route::init();
+Agent_Ready_Discovery::init();
 
-register_activation_hook( __FILE__, array( 'Agent_Sitemap_Route', 'activate' ) );
-register_deactivation_hook( __FILE__, array( 'Agent_Sitemap_Route', 'deactivate' ) );
-register_deactivation_hook( __FILE__, array( 'Agent_Sitemap_Discovery', 'restore' ) );
+register_activation_hook( __FILE__, array( 'Agent_Ready_Route', 'activate' ) );
+register_deactivation_hook( __FILE__, array( 'Agent_Ready_Route', 'deactivate' ) );
+register_deactivation_hook( __FILE__, array( 'Agent_Ready_Discovery', 'restore' ) );

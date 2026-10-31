@@ -2,7 +2,7 @@
 /**
  * Discovery: points agents to the books.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -11,12 +11,12 @@ defined( 'ABSPATH' ) || exit;
  * Serves llms.txt, writes the link tags and handles an existing llms.txt.
  * Spec: Publish, Discovery.
  */
-class Agent_Sitemap_Discovery {
+class Agent_Ready_Discovery {
 
 	/**
 	 * The option set when the notice is dismissed.
 	 */
-	const DISMISSED = 'agent_sitemap_notice_dismissed';
+	const DISMISSED = 'agent_ready_notice_dismissed';
 
 	/**
 	 * Hooks into WordPress.
@@ -24,8 +24,8 @@ class Agent_Sitemap_Discovery {
 	public static function init() {
 		add_action( 'wp_head', array( __CLASS__, 'links' ) );
 		add_action( 'admin_notices', array( __CLASS__, 'notice' ) );
-		add_action( 'admin_post_agent_sitemap_replace', array( __CLASS__, 'replace' ) );
-		add_action( 'admin_post_agent_sitemap_dismiss', array( __CLASS__, 'dismiss' ) );
+		add_action( 'admin_post_agent_ready_replace', array( __CLASS__, 'replace' ) );
+		add_action( 'admin_post_agent_ready_dismiss', array( __CLASS__, 'dismiss' ) );
 	}
 
 	/**
@@ -39,25 +39,25 @@ class Agent_Sitemap_Discovery {
 		if ( '' !== $tagline ) {
 			$text .= '> ' . $tagline . "\n\n";
 		}
-		return $text . "## Agent sitemap\n\n- [Agent sitemap](" . Agent_Sitemap_Route::book_url() . "): every public page of this site as text\n";
+		return $text . "## Agent sitemap\n\n- [Agent sitemap](" . Agent_Ready_Route::book_url() . "): every public page of this site as text\n";
 	}
 
 	/**
 	 * Writes the link tags. Discovery 3, 4.
 	 */
 	public static function links() {
-		if ( ! Agent_Sitemap_Visibility::is_site_public() ) {
+		if ( ! Agent_Ready_Visibility::is_site_public() ) {
 			return;
 		}
 
-		printf( '<link rel="describedby" href="%s">' . "\n", esc_url( Agent_Sitemap_Route::llms_url() ) );
+		printf( '<link rel="describedby" href="%s">' . "\n", esc_url( Agent_Ready_Route::llms_url() ) );
 
 		$post = get_queried_object();
-		if ( is_singular() && $post instanceof WP_Post && Agent_Sitemap_Visibility::is_post_public( $post ) ) {
+		if ( is_singular() && $post instanceof WP_Post && Agent_Ready_Visibility::is_post_public( $post ) ) {
 			printf(
 				'<link rel="alternate" type="%s" href="%s">' . "\n",
-				esc_attr( Agent_Sitemap_Response::MTSV_MEDIA ),
-				esc_url( Agent_Sitemap_Route::post_url( $post->ID ) )
+				esc_attr( Agent_Ready_Response::MTSV_MEDIA ),
+				esc_url( Agent_Ready_Route::post_url( $post->ID ) )
 			);
 		}
 	}
@@ -99,9 +99,9 @@ class Agent_Sitemap_Discovery {
 		}
 
 		echo '<div class="notice notice-info"><p>' . esc_html__( 'Your site already has an llms.txt.', 'agent-ready' ) . '</p><p>';
-		self::button( 'agent_sitemap_replace', __( 'Use Agent Ready\'s', 'agent-ready' ), 'button button-primary' );
+		self::button( 'agent_ready_replace', __( 'Use Agent Ready\'s', 'agent-ready' ), 'button button-primary' );
 		echo ' ';
-		self::button( 'agent_sitemap_dismiss', __( 'Dismiss', 'agent-ready' ), 'button' );
+		self::button( 'agent_ready_dismiss', __( 'Dismiss', 'agent-ready' ), 'button' );
 		echo '</p></div>';
 	}
 
@@ -123,12 +123,12 @@ class Agent_Sitemap_Discovery {
 	 * Renames the existing llms.txt to llms.txt.bak. Discovery 5.
 	 */
 	public static function replace() {
-		check_admin_referer( 'agent_sitemap_replace' );
+		check_admin_referer( 'agent_ready_replace' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You cannot do this.', 'agent-ready' ) );
 		}
 
-		$filesystem = Agent_Sitemap_Route::filesystem();
+		$filesystem = Agent_Ready_Route::filesystem();
 		$path       = self::path();
 		if ( $filesystem ) {
 			$filesystem->move( $path, $path . '.bak' );
@@ -141,7 +141,7 @@ class Agent_Sitemap_Discovery {
 	 * Dismisses the notice. Discovery 5.
 	 */
 	public static function dismiss() {
-		check_admin_referer( 'agent_sitemap_dismiss' );
+		check_admin_referer( 'agent_ready_dismiss' );
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'You cannot do this.', 'agent-ready' ) );
 		}
@@ -155,7 +155,7 @@ class Agent_Sitemap_Discovery {
 	 * Restores llms.txt.bak on deactivation. Discovery 5.
 	 */
 	public static function restore() {
-		$filesystem = Agent_Sitemap_Route::filesystem();
+		$filesystem = Agent_Ready_Route::filesystem();
 		$path       = self::path();
 		if ( $filesystem && $filesystem->exists( $path . '.bak' ) && ! $filesystem->exists( $path ) ) {
 			$filesystem->move( $path . '.bak', $path );

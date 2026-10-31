@@ -5,7 +5,7 @@
  * Core's providers return only URLs and dates, and keep their queries
  * protected, so this class runs the same queries with the same filters.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Gathers posts, terms and users. Spec: Gather, Providers.
  */
-class Agent_Sitemap_Providers {
+class Agent_Ready_Providers {
 
 	/**
 	 * The public post types, without attachments. Providers 1.
@@ -50,7 +50,7 @@ class Agent_Sitemap_Providers {
 					'order'                  => 'ASC',
 					'post_type'              => $post_type,
 					'posts_per_page'         => wp_sitemaps_get_max_urls( 'post' ),
-					'post_status'            => Agent_Sitemap_Visibility::post_statuses(),
+					'post_status'            => Agent_Ready_Visibility::post_statuses(),
 					'no_found_rows'          => true,
 					'update_post_term_cache' => false,
 					'update_post_meta_cache' => false,

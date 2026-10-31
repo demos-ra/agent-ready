@@ -2,7 +2,7 @@
 /**
  * Response: the HTTP status and headers of each reply.
  *
- * @package Agent_Sitemap
+ * @package Agent_Ready
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Sends replies. Spec: Publish, Response.
  */
-class Agent_Sitemap_Response {
+class Agent_Ready_Response {
 
 	/**
 	 * The media type of a book. Response 1.
