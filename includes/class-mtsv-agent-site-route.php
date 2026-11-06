@@ -38,6 +38,7 @@ class MTSV_Agent_Site_Route {
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register' ) );
+		add_action( 'init', array( __CLASS__, 'flush_when_missing' ), 11 );
 		add_filter( 'query_vars', array( __CLASS__, 'query_vars' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'render' ), 9 );
 	}
@@ -50,18 +51,44 @@ class MTSV_Agent_Site_Route {
 		$slug      = preg_quote( self::SLUG, '/' );
 		$providers = implode( '|', MTSV_Agent_Site_Providers::NAMES );
 
-		add_rewrite_rule( '^' . $slug . '\.mtsv$', 'index.php?' . self::QUERY . '=index', 'top' );
+		add_rewrite_rule( self::index_rule(), 'index.php?' . self::QUERY . '=index', 'top' );
 		add_rewrite_rule(
-			'^' . $slug . '-(' . $providers . ')-([a-z\d_-]+?)-(\d+?)\.mtsv$',
+			'^' . $slug . '/(' . $providers . ')-([a-z\d_-]+?)-(\d+?)\.mtsv$',
 			'index.php?' . self::QUERY . '=$matches[1]&' . self::SUBTYPE . '=$matches[2]&' . self::NUMBER . '=$matches[3]',
 			'top'
 		);
 		add_rewrite_rule(
-			'^' . $slug . '-(' . $providers . ')-(\d+?)\.mtsv$',
+			'^' . $slug . '/(' . $providers . ')-(\d+?)\.mtsv$',
 			'index.php?' . self::QUERY . '=$matches[1]&' . self::NUMBER . '=$matches[2]',
 			'top'
 		);
-		add_rewrite_rule( '^' . $slug . '-post-(\d+)\.mtsv$', 'index.php?' . self::QUERY . '=post&' . self::NUMBER . '=$matches[1]', 'top' );
+		add_rewrite_rule( '^' . $slug . '/post-(\d+)\.mtsv$', 'index.php?' . self::QUERY . '=post&' . self::NUMBER . '=$matches[1]', 'top' );
+	}
+
+	/**
+	 * The index route's rule, as WordPress saves it. Route 1, 4.
+	 *
+	 * @return string The rule.
+	 */
+	private static function index_rule() {
+		return '^' . preg_quote( self::SLUG, '/' ) . '/index\.mtsv$';
+	}
+
+	/**
+	 * Flushes the routes when WordPress's saved rules lack them, as after an
+	 * update, after every route is added. Plain permalinks save no rules.
+	 * Route 1.
+	 */
+	public static function flush_when_missing() {
+		global $wp_rewrite;
+
+		if ( ! $wp_rewrite->using_permalinks() ) {
+			return;
+		}
+		$rules = get_option( 'rewrite_rules' );
+		if ( ! is_array( $rules ) || ! isset( $rules[ self::index_rule() ] ) ) {
+			flush_rewrite_rules();
+		}
 	}
 
 	/**
@@ -114,7 +141,7 @@ class MTSV_Agent_Site_Route {
 	 * @return string The URL.
 	 */
 	public static function index_url() {
-		return self::url( '/' . self::SLUG . '.mtsv', array( self::QUERY => 'index' ) );
+		return self::url( '/' . self::SLUG . '/index.mtsv', array( self::QUERY => 'index' ) );
 	}
 
 	/**
@@ -132,7 +159,7 @@ class MTSV_Agent_Site_Route {
 			self::SUBTYPE => $subtype,
 			self::NUMBER  => $page,
 		);
-		return self::url( '/' . self::SLUG . '-' . implode( '-', array_filter( $params ) ) . '.mtsv', $params );
+		return self::url( '/' . self::SLUG . '/' . implode( '-', array_filter( $params ) ) . '.mtsv', $params );
 	}
 
 	/**
@@ -143,7 +170,7 @@ class MTSV_Agent_Site_Route {
 	 */
 	public static function post_url( $post_id ) {
 		return self::url(
-			'/' . self::SLUG . '-post-' . $post_id . '.mtsv',
+			'/' . self::SLUG . '/post-' . $post_id . '.mtsv',
 			array(
 				self::QUERY  => 'post',
 				self::NUMBER => $post_id,
@@ -183,6 +210,7 @@ class MTSV_Agent_Site_Route {
 			MTSV_Agent_Site_Response::not_found();
 			return;
 		}
+		MTSV_Agent_Site_Discovery::link_header();
 		MTSV_Agent_Site_Response::send( $text, MTSV_Agent_Site_Response::MTSV_TYPE );
 		exit;
 	}

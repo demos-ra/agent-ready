@@ -1,9 +1,9 @@
 <?php
 /**
- * Plugin Name: MTSV Agent Site – Your Whole Site as a Spreadsheet for AI Agents
+ * Plugin Name: MTSV Agent Site – Your Whole Site as an AI Agent Database
  * Plugin URI:  https://github.com/demos-ra/mtsv-agent-site
- * Description: Lets AI agents read your whole site: every public post, page, category and author as linked spreadsheets, listed in llms.txt. No setup.
- * Version:     1.0.0
+ * Description: Lets AI agents read your whole public site as one database: every post, page, category and author, linked and listed in llms.txt. No setup.
+ * Version:     1.1.0
  * Requires at least: 5.7
  * Requires PHP: 7.4
  * Author:      Demos Ra
@@ -11,6 +11,10 @@
  * License:     GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: mtsv-agent-site
+ *
+ * Spec: Release, Package. This header is Package 1, 2 and 5; the code as a
+ * whole is Package 3, 4 and 6: no contact with external servers, no bundled
+ * libraries WordPress already ships, the WordPress PHP Coding Standards.
  *
  * @package MTSV_Agent_Site
  */

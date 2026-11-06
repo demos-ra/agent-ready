@@ -1,6 +1,6 @@
 <?php
 /**
- * Discovery: points agents to the books.
+ * Discovery: points agents to the agent site.
  *
  * @package MTSV_Agent_Site
  */
@@ -8,7 +8,8 @@
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Serves llms.txt and writes the link tags. Spec: Publish, Discovery.
+ * Serves llms.txt, and writes the link tags and the Link header. Spec:
+ * Publish, Discovery.
  */
 class MTSV_Agent_Site_Discovery {
 
@@ -19,7 +20,7 @@ class MTSV_Agent_Site_Discovery {
 	const QUERY = 'mtsv_agent_site_llms';
 
 	/**
-	 * Hooks into WordPress. Discovery 2-4.
+	 * Hooks into WordPress. Discovery 2-5.
 	 */
 	public static function init() {
 		add_action( 'init', array( __CLASS__, 'register' ) );
@@ -29,13 +30,12 @@ class MTSV_Agent_Site_Discovery {
 	}
 
 	/**
-	 * Adds the llms.txt route at the top, only when the site is installed at
-	 * the root. Discovery 2.
+	 * Adds the llms.txt routes at the top: under the site's home, at the root
+	 * or in a subfolder, and under the agent site. Discovery 2.
 	 */
 	public static function register() {
-		if ( self::is_root() ) {
-			add_rewrite_rule( '^llms\.txt$', 'index.php?' . self::QUERY . '=1', 'top' );
-		}
+		add_rewrite_rule( '^llms\.txt$', 'index.php?' . self::QUERY . '=1', 'top' );
+		add_rewrite_rule( '^' . preg_quote( MTSV_Agent_Site_Route::SLUG, '/' ) . '/llms\.txt$', 'index.php?' . self::QUERY . '=1', 'top' );
 	}
 
 	/**
@@ -58,18 +58,7 @@ class MTSV_Agent_Site_Discovery {
 	}
 
 	/**
-	 * Whether the site is installed at the root, as core asks before adding
-	 * robots.txt. Discovery 2, 4.
-	 *
-	 * @return bool Whether it is.
-	 */
-	public static function is_root() {
-		$path = wp_parse_url( home_url(), PHP_URL_PATH );
-		return empty( $path ) || '/' === $path;
-	}
-
-	/**
-	 * The URL of llms.txt. Discovery 2, 4.
+	 * The URL of the llms.txt at the site's home. Discovery 2, 4.
 	 *
 	 * @return string The URL.
 	 */
@@ -78,11 +67,21 @@ class MTSV_Agent_Site_Discovery {
 	}
 
 	/**
+	 * The URL of the agent site's llms.txt. Discovery 2, 6.
+	 *
+	 * @return string The URL.
+	 */
+	public static function agent_llms_url() {
+		return MTSV_Agent_Site_Route::url( '/' . MTSV_Agent_Site_Route::SLUG . '/llms.txt', array( self::QUERY => 1 ) );
+	}
+
+	/**
 	 * The detail paragraphs of llms.txt. Discovery 1.
 	 */
 	const DETAILS = array(
-		'The whole site as linked tables: every public post, page, category, tag and author, and each post\'s text, listed from one index below. Read it instead of crawling HTML, an XML sitemap of bare URLs, or a JSON API that repeats every key.',
-		'MTSV: TSV with sheets, the floor of structured text. `\t` between fields, `\n` between rows, `\f` before each sheet\'s name line, then its column names, then its rows. Sheets link by ID: join, filter and aggregate like a database. No quotes, braces, escaping or repeated keys: one pass, nearly every token is data.',
+		'The whole site as one database of linked tables: every public post, page, category, tag and author, and each post\'s text, listed from one index below. Read it instead of crawling HTML, an XML sitemap of bare URLs, or a JSON API that repeats every key.',
+		'MTSV: TSV with sheets, the floor of structured text. `\t` between fields, `\n` between rows, `\f` before each sheet\'s name line, then its column names, then its rows. Sheets link by ID: join, filter and aggregate. No quotes, braces, escaping or repeated keys: one pass, nearly every token is data.',
+		'Each .mtsv file is a book of sheets. The index\'s sitemap sheet lists every book; its fields sheet, every sheet\'s columns, keys and references. Each post\'s text is its own book, at posts.alternate. Without form feeds, a sheet starts at a line holding only its name, a relation in the fields sheet.',
 	);
 
 	/**
@@ -117,14 +116,14 @@ class MTSV_Agent_Site_Discovery {
 	}
 
 	/**
-	 * Sends llms.txt, or answers 404 while the site is not public or not
-	 * installed at the root. Discovery 2; Response 2, 3.
+	 * Sends llms.txt, or answers 404 while the site is not public.
+	 * Discovery 2; Response 2, 3.
 	 */
 	public static function render() {
 		if ( ! get_query_var( self::QUERY ) ) {
 			return;
 		}
-		if ( ! MTSV_Agent_Site_Visibility::is_site_public() || ! self::is_root() ) {
+		if ( ! MTSV_Agent_Site_Visibility::is_site_public() ) {
 			MTSV_Agent_Site_Response::not_found();
 			return;
 		}
@@ -133,15 +132,21 @@ class MTSV_Agent_Site_Discovery {
 	}
 
 	/**
-	 * Writes the link tags. Discovery 3, 4.
+	 * Writes the link tags. Discovery 3, 4, 5.
 	 */
 	public static function links() {
 		if ( ! MTSV_Agent_Site_Visibility::is_site_public() ) {
 			return;
 		}
 
-		if ( self::is_root() ) {
-			printf( '<link rel="describedby" href="%s">' . "\n", esc_url( self::llms_url() ) );
+		printf( '<link rel="describedby" href="%s">' . "\n", esc_url( self::llms_url() ) );
+
+		if ( is_front_page() && is_home() ) {
+			printf(
+				'<link rel="alternate" type="%s" href="%s">' . "\n",
+				esc_attr( MTSV_Agent_Site_Response::MTSV_MEDIA ),
+				esc_url( MTSV_Agent_Site_Route::index_url() )
+			);
 		}
 
 		$post = get_queried_object();
@@ -152,5 +157,22 @@ class MTSV_Agent_Site_Discovery {
 				esc_url( MTSV_Agent_Site_Route::post_url( $post->ID ) )
 			);
 		}
+	}
+
+	/**
+	 * The value of a book reply's Link header: the agent site's llms.txt.
+	 * Discovery 6.
+	 *
+	 * @return string The value.
+	 */
+	public static function link() {
+		return '<' . esc_url_raw( self::agent_llms_url() ) . '>; rel="describedby"';
+	}
+
+	/**
+	 * Sends a book reply's Link header. Discovery 6.
+	 */
+	public static function link_header() {
+		header( 'Link: ' . self::link() );
 	}
 }

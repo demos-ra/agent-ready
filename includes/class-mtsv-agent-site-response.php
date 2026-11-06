@@ -1,6 +1,6 @@
 <?php
 /**
- * Response: the HTTP status and headers of each reply.
+ * Response: each reply's HTTP status, media type and caching.
  *
  * @package MTSV_Agent_Site
  */

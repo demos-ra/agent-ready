@@ -1,24 +1,24 @@
-=== MTSV Agent Site – Your Whole Site as a Spreadsheet for AI Agents ===
+=== MTSV Agent Site – Your Whole Site as an AI Agent Database ===
 Contributors: demosra
-Tags: ai agents, llms.txt, sitemap, spreadsheet, seo
+Tags: ai agents, llms.txt, sitemap, llm, seo
 Requires at least: 5.7
 Tested up to: 7.1
-Stable tag: 1.0.0
+Stable tag: 1.1.0
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Lets AI agents read your whole site: every public post, page, category and author as linked spreadsheets, listed in llms.txt. No setup.
+Lets AI agents read your whole public site as one database: every post, page, category and author, linked and listed in llms.txt. No setup.
 
 == Description ==
 
-MTSV Agent Site publishes your whole site for AI agents: every public post, page, category, tag and author, as linked spreadsheets. Agents get all of it in one place, already connected, so they can understand your site as a whole instead of piecing it together page by page.
+MTSV Agent Site publishes your whole site for AI agents: every public post, page, category, tag and author, as one linked database. Agents get all of it in one place, already connected, so they can understand your site as a whole instead of piecing it together page by page.
 
 Where other plugins give agents a list of links or your pages as text, MTSV Agent Site also gives them how everything connects.
 
 = What agents get =
 
-* One index of everything: `/agent-site.mtsv`.
+* One index of everything: `/agent-site/index.mtsv`.
 * Your posts, pages, categories, tags and authors, linked to each other.
 * Each post's text as visitors see it, paragraph by paragraph.
 
@@ -45,11 +45,11 @@ It is all the public text and structure. It leaves out drafts, private posts, me
 
 = My site already has an llms.txt. =
 
-Yours is served instead, and agents still find each post's text from its page. To add the agent site to your llms.txt, link to `/agent-site.mtsv`.
+Yours is served instead. The agent site's own is always at `/agent-site/llms.txt`, and agents still find each post's text from its page. To add the agent site to your llms.txt, link to `/agent-site/llms.txt`.
 
 = My site is in a subfolder. =
 
-llms.txt works only at the root of a domain, as robots.txt does. Everything else works.
+Everything works, llms.txt included: the llms.txt standard allows it in a subfolder.
 
 = What about password-protected posts? =
 
@@ -65,13 +65,21 @@ It reads what WordPress outputs as each post's content, so a builder that stores
 
 = What about my host or caching plugin? =
 
-A host that blocks `.mtsv` files stops the spreadsheets, and a caching plugin may serve an older copy until it refreshes.
+A host that blocks `.mtsv` files stops the database, and a caching plugin may serve an older copy until it refreshes.
 
 = How do I turn it off for agents? =
 
 Turn on "Discourage search engines" in Settings, Reading, or deactivate the plugin. Developers can use the `mtsv_agent_site_enabled` filter.
 
 == Changelog ==
+
+= 1.1.0 =
+* Renamed: Your Whole Site as an AI Agent Database.
+* The agent site moves under `/agent-site/`, with its own llms.txt at `/agent-site/llms.txt`.
+* llms.txt works when WordPress is in a subfolder.
+* llms.txt tells agents where to start and how to read the database.
+* The index lists only files with rows.
+* A latest-posts front page links to the index, and every file points back to llms.txt.
 
 = 1.0.0 =
 * First release.

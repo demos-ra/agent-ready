@@ -17,9 +17,11 @@ defined( 'ABSPATH' ) || exit;
 class MTSV_Agent_Site_Relations {
 
 	/**
-	 * The index book: the sitemap sheet, listing every book of every
-	 * provider's sitemaps, as core's index lists its sitemaps, then the
-	 * fields sheet, the schema. Relations 1; Fields 2.
+	 * The index book: the sitemap sheet, listing every book with rows of
+	 * every provider's sitemaps, as core's index lists its sitemaps, then the
+	 * fields sheet, the schema. Core counts exactly but for a latest-posts
+	 * homepage, which can leave the last page of a subtype empty, so only
+	 * that page is checked. Relations 1; Fields 2; Visibility 3.
 	 *
 	 * @param callable $book_url Gives a book's URL: provider, subtype, page.
 	 * @return array The sheets.
@@ -29,6 +31,9 @@ class MTSV_Agent_Site_Relations {
 		foreach ( MTSV_Agent_Site_Providers::NAMES as $name ) {
 			foreach ( MTSV_Agent_Site_Providers::type_data( $name ) as $type ) {
 				for ( $page = 1; $page <= $type['pages']; $page++ ) {
+					if ( $page === (int) $type['pages'] && empty( MTSV_Agent_Site_Providers::objects( $name, $type['name'], $page ) ) ) {
+						continue;
+					}
 					$rows[] = MTSV_Agent_Site_Fields::sitemap_row( call_user_func( $book_url, $name, $type['name'], $page ) );
 				}
 			}
